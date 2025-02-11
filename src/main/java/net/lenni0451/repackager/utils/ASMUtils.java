@@ -6,6 +6,8 @@ import org.objectweb.asm.commons.ClassRemapper;
 import org.objectweb.asm.commons.Remapper;
 import org.objectweb.asm.tree.ClassNode;
 
+import javax.annotation.Nullable;
+
 public class ASMUtils {
 
     public static ClassNode fromBytes(final byte[] bytes) {
@@ -25,6 +27,19 @@ public class ASMUtils {
         ClassNode remappedNode = new ClassNode();
         classNode.accept(new ClassRemapper(remappedNode, remapper));
         return remappedNode;
+    }
+
+    @Nullable
+    public static String remap(final PackageRemapper remapper, final String s) {
+        try {
+            if (s.contains("/")) {
+                return remapper.mapUnchecked(s);
+            } else {
+                return remapper.mapUnchecked(s.replace('.', '/')).replace('/', '.');
+            }
+        } catch (Throwable ignored) {
+        }
+        return null;
     }
 
 }

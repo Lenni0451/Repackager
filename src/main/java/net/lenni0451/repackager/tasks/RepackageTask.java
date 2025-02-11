@@ -9,12 +9,14 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.*;
 import org.objectweb.asm.tree.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -86,9 +88,9 @@ public abstract class RepackageTask extends DefaultTask {
                     } else if (pathString.toLowerCase().startsWith("meta-inf/")) {
                         if (this.getRemapServices().get() && pathString.startsWith("meta-inf/services/")) {
                             String serviceName = path.toString().substring(19);
-                            String remappedServiceName = remapper.mapType(serviceName);
+                            String remappedServiceName = ASMUtils.remap(remapper, serviceName);
                             String serviceImpl = new String(Files.readAllBytes(path)).trim();
-                            String remappedServiceImpl = remapper.mapType(serviceImpl);
+                            String remappedServiceImpl = ASMUtils.remap(remapper, serviceImpl);
                             if (!serviceImpl.equals(remappedServiceImpl)) {
                                 Files.write(path, remappedServiceImpl.getBytes(StandardCharsets.UTF_8));
                                 this.getLogger().info("Remapped service implementation: {} -> {}", serviceImpl, remappedServiceImpl);
@@ -108,14 +110,8 @@ public abstract class RepackageTask extends DefaultTask {
                             for (Attributes attributes : allAttributes) {
                                 for (Map.Entry<Object, Object> entry : attributes.entrySet()) {
                                     String value = entry.getValue().toString();
-                                    String remappedValue;
-                                    try {
-                                        remappedValue = remapper.mapType(value);
-                                    } catch (Throwable t) {
-                                        remappedValue = remapper.map(value);
-                                        if (remappedValue == null) remappedValue = value;
-                                    }
-                                    if (!value.equals(remappedValue)) {
+                                    String remappedValue = ASMUtils.remap(remapper, value);
+                                    if (remappedValue != null && !value.equals(remappedValue)) {
                                         entry.setValue(remappedValue);
                                         modified = true;
                                     }
@@ -123,18 +119,32 @@ public abstract class RepackageTask extends DefaultTask {
                             }
 
                             if (modified) {
-                                Files.write(path, manifest.toString().getBytes(StandardCharsets.UTF_8));
+                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                manifest.write(baos);
+                                Files.write(path, baos.toByteArray());
                                 this.getLogger().info("Remapped manifest: {}", path);
                             }
                         }
                     }
 
-                    String remappedPath = remapper.mapUnchecked(pathString);
-                    if (remappedPath != null && !pathString.equals(remappedPath)) {
-                        Path newPath = fileSystem.getPath((slash ? "/" : "") + remappedPath);
-                        Files.createDirectories(newPath.getParent());
-                        Files.move(path, newPath);
-                        this.getLogger().debug("Remapped file: {} -> {}", path, newPath);
+                    if (pathString.toLowerCase(Locale.ROOT).startsWith("meta-inf/versions/")) {
+                        String prefix = pathString.substring(0, pathString.indexOf('/', 18) + 1);
+                        String suffix = pathString.substring(pathString.indexOf('/', 18) + 1);
+                        String remappedSuffix = remapper.mapUnchecked(suffix);
+                        if (remappedSuffix != null && !suffix.equals(remappedSuffix)) {
+                            Path newPath = fileSystem.getPath((slash ? "/" : "") + prefix + remappedSuffix);
+                            Files.createDirectories(newPath.getParent());
+                            Files.move(path, newPath);
+                            this.getLogger().debug("Remapped versioned file: {} -> {}", path, newPath);
+                        }
+                    } else {
+                        String remappedPath = remapper.mapUnchecked(pathString);
+                        if (remappedPath != null && !pathString.equals(remappedPath)) {
+                            Path newPath = fileSystem.getPath((slash ? "/" : "") + remappedPath);
+                            Files.createDirectories(newPath.getParent());
+                            Files.move(path, newPath);
+                            this.getLogger().debug("Remapped file: {} -> {}", path, newPath);
+                        }
                     }
                 } catch (Throwable t) {
                     throw new IllegalStateException("Failed to remap file: " + path, t);
@@ -164,14 +174,8 @@ public abstract class RepackageTask extends DefaultTask {
         for (FieldNode field : node.fields) {
             if (field.value instanceof String) {
                 String s = (String) field.value; //Field default values
-                try {
-                    //Remap with dots
-                    field.value = remapper.mapType(s);
-                } catch (Throwable t) {
-                    //Remap with slashes
-                    String mapped = remapper.map(s);
-                    if (mapped != null) field.value = mapped;
-                }
+                s = ASMUtils.remap(remapper, s);
+                if (s != null) field.value = s;
             }
         }
         for (MethodNode method : node.methods) {
@@ -180,14 +184,8 @@ public abstract class RepackageTask extends DefaultTask {
                     LdcInsnNode ldc = (LdcInsnNode) instruction;
                     if (ldc.cst instanceof String) {
                         String s = (String) ldc.cst;
-                        try {
-                            //Remap with dots
-                            ldc.cst = remapper.mapType(s);
-                        } catch (Throwable t) {
-                            //Remap with slashes
-                            String mapped = remapper.map(s);
-                            if (mapped != null) ldc.cst = mapped;
-                        }
+                        s = ASMUtils.remap(remapper, s);
+                        if (s != null) ldc.cst = s;
                     }
                 }
             }
