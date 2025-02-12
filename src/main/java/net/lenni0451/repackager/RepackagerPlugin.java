@@ -17,7 +17,7 @@ public class RepackagerPlugin implements Plugin<Project> {
     @Override
     public void apply(Project target) {
         RepackagerExtension repackagerExtension = target.getExtensions().create("repackager", RepackagerExtension.class, target);
-        DependencyRepackagerExtension dependencyRepackagerExtension = target.getExtensions().create("dependencyRepackager", DependencyRepackagerExtension.class);
+        DependencyRepackagerExtension dependencyRepackagerExtension = target.getExtensions().create("dependencyRepackager", DependencyRepackagerExtension.class, target);
 
         target.afterEvaluate(project -> {
             if (repackagerExtension.getJarFile().isPresent()) {
