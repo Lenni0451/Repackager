@@ -8,7 +8,14 @@ import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
 
-public abstract class RepackageExtension {
+public abstract class RepackagerExtension {
+
+    public RepackagerExtension() {
+        this.getRemapStrings().convention(false);
+        this.getRemapServices().convention(true);
+        this.getRemapManifest().convention(true);
+        this.getRemoveEmptyDirs().convention(false);
+    }
 
     @InputFile
     public abstract RegularFileProperty getJarFile();
@@ -31,12 +38,5 @@ public abstract class RepackageExtension {
 
     @Input
     public abstract Property<Boolean> getRemoveEmptyDirs();
-
-    public RepackageExtension() {
-        this.getRemapStrings().convention(false);
-        this.getRemapServices().convention(true);
-        this.getRemapManifest().convention(true);
-        this.getRemoveEmptyDirs().convention(false);
-    }
 
 }
