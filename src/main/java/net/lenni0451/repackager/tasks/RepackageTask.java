@@ -31,6 +31,13 @@ public abstract class RepackageTask extends DefaultTask {
     @Input
     public abstract Property<Boolean> getRemoveEmptyDirs();
 
+    public RepackageTask() {
+        this.getRemapStrings().convention(false);
+        this.getRemapServices().convention(true);
+        this.getRemapManifest().convention(true);
+        this.getRemoveEmptyDirs().convention(false);
+    }
+
     @TaskAction
     public void run() throws Throwable {
         Repackager.builder()
