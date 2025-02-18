@@ -1,13 +1,15 @@
 package net.lenni0451.repackager.tasks;
 
 import net.lenni0451.repackager.Repackager;
+import net.lenni0451.repackager.settings.RepackageSettings;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.provider.MapProperty;
-import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.*;
+import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.TaskAction;
 
-public abstract class RepackageTask extends DefaultTask {
+public abstract class RepackageTask extends DefaultTask implements RepackageSettings {
 
     @InputFile
     public abstract RegularFileProperty getJarFile();
@@ -16,26 +18,8 @@ public abstract class RepackageTask extends DefaultTask {
     @OutputFile
     public abstract RegularFileProperty getOutputFile();
 
-    @Input
-    public abstract MapProperty<String, String> getRelocations();
-
-    @Input
-    public abstract Property<Boolean> getRemapStrings();
-
-    @Input
-    public abstract Property<Boolean> getRemapServices();
-
-    @Input
-    public abstract Property<Boolean> getRemapManifest();
-
-    @Input
-    public abstract Property<Boolean> getRemoveEmptyDirs();
-
     public RepackageTask() {
-        this.getRemapStrings().convention(false);
-        this.getRemapServices().convention(true);
-        this.getRemapManifest().convention(true);
-        this.getRemoveEmptyDirs().convention(false);
+        this.initDefaults();
     }
 
     @TaskAction

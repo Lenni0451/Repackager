@@ -3,15 +3,13 @@ package net.lenni0451.repackager.transforms;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.repackager.Repackager;
+import net.lenni0451.repackager.settings.RepackageSettings;
 import org.gradle.api.artifacts.transform.InputArtifact;
 import org.gradle.api.artifacts.transform.TransformAction;
 import org.gradle.api.artifacts.transform.TransformOutputs;
 import org.gradle.api.artifacts.transform.TransformParameters;
 import org.gradle.api.file.FileSystemLocation;
-import org.gradle.api.provider.MapProperty;
-import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
-import org.gradle.api.tasks.Input;
 
 import java.io.File;
 
@@ -39,21 +37,7 @@ public abstract class RepackageTransform implements TransformAction<RepackageTra
     }
 
 
-    public interface Parameters extends TransformParameters {
-        @Input
-        MapProperty<String, String> getRelocations();
-
-        @Input
-        Property<Boolean> getRemapStrings();
-
-        @Input
-        Property<Boolean> getRemapServices();
-
-        @Input
-        Property<Boolean> getRemapManifest();
-
-        @Input
-        Property<Boolean> getRemoveEmptyDirs();
+    public interface Parameters extends TransformParameters, RepackageSettings {
     }
 
 }

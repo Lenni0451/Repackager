@@ -1,46 +1,28 @@
 package net.lenni0451.repackager.extensions;
 
+import net.lenni0451.repackager.settings.RepackageSettings;
 import net.lenni0451.repackager.transforms.RepackageTransform;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition;
-import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 
 import java.util.Map;
 
-public abstract class DependencyRepackagerExtension {
+public abstract class DependencyRepackagerExtension implements RepackageSettings {
 
     private final Project project;
 
     public DependencyRepackagerExtension(final Project project) {
         this.project = project;
-        this.getRemapStrings().convention(false);
-        this.getRemapServices().convention(true);
-        this.getRemapManifest().convention(true);
-        this.getRemoveEmptyDirs().convention(false);
+        this.initDefaults();
     }
 
     @Input
     public abstract Property<Configuration> getConfiguration();
-
-    @Input
-    public abstract MapProperty<String, String> getRelocations();
-
-    @Input
-    public abstract Property<Boolean> getRemapStrings();
-
-    @Input
-    public abstract Property<Boolean> getRemapServices();
-
-    @Input
-    public abstract Property<Boolean> getRemapManifest();
-
-    @Input
-    public abstract Property<Boolean> getRemoveEmptyDirs();
 
     public void register(final Configuration configuration, final Map<String, String> relocations, final boolean remapStrings, final boolean remapServices, final boolean remapManifest, final boolean removeEmptyDirs) {
         this.project.afterEvaluate(project -> {
