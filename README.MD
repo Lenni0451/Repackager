@@ -3,7 +3,15 @@ Gradle plugin for repackaging the build output and dependencies.\
 Dependencies are remapped before they are imported into the IDE. This allows you to use multiple versions of the same library in your project.
 
 ## Installation
-To use this plugin, you need to add my maven server to your plugin repositories:
+To use this plugin, you need to add the gradle plugin portal to your plugin repositories:
+```groovy
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+```
+alternatively, you can add my maven repository instead:
 ```groovy
 pluginManagement {
     repositories {
