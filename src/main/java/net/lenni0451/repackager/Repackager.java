@@ -63,23 +63,34 @@ public class Repackager {
                     String pathString = path.toString();
                     boolean slash = pathString.startsWith("/");
                     if (slash) pathString = pathString.substring(1);
-                    if (path.getFileName().toString().toLowerCase().endsWith(".class")) {
+                    if (path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".class")) {
                         byte[] bytes = Files.readAllBytes(path);
                         ClassNode node = ASMUtils.remap(ASMUtils.fromBytes(bytes), remapper);
                         if (this.remapStrings) this.remapStrings(node, remapper);
                         Files.write(path, ASMUtils.toBytes(node));
                         this.logger.debug("Remapped class: {}", path);
-                    } else if (pathString.toLowerCase().startsWith("meta-inf/")) {
-                        if (this.remapServices && pathString.startsWith("meta-inf/services/")) {
+                    } else if (pathString.toLowerCase(Locale.ROOT).startsWith("meta-inf/")) {
+                        if (this.remapServices && pathString.toLowerCase(Locale.ROOT).startsWith("meta-inf/services/")) {
                             String serviceName = path.toString().substring(19);
                             String remappedServiceName = ASMUtils.remap(remapper, serviceName);
-                            String serviceImpl = new String(Files.readAllBytes(path)).trim();
-                            String remappedServiceImpl = ASMUtils.remap(remapper, serviceImpl);
-                            if (!serviceImpl.equals(remappedServiceImpl)) {
-                                Files.write(path, remappedServiceImpl.getBytes(StandardCharsets.UTF_8));
-                                this.logger.info("Remapped service implementation: {} -> {}", serviceImpl, remappedServiceImpl);
+                            String[] serviceImpls = Files.readAllLines(path, StandardCharsets.UTF_8).toArray(new String[0]);
+                            String[] remappedServiceImpls = new String[serviceImpls.length];
+                            boolean modified = false;
+                            for (int i = 0; i < serviceImpls.length; i++) {
+                                String serviceImpl = serviceImpls[i];
+                                String remappedServiceImpl = ASMUtils.remap(remapper, serviceImpl);
+                                if (serviceImpl.startsWith("#") || remappedServiceImpl == null) {
+                                    remappedServiceImpls[i] = serviceImpl;
+                                } else {
+                                    remappedServiceImpls[i] = remappedServiceImpl;
+                                    modified |= !serviceImpl.equals(remappedServiceImpl);
+                                }
                             }
-                            if (!serviceName.equals(remappedServiceName)) {
+                            if (modified) {
+                                Files.write(path, String.join("\n", remappedServiceImpls).getBytes(StandardCharsets.UTF_8));
+                                this.logger.info("Remapped service implementations: {} -> {}", String.join(", ", serviceImpls), String.join(", ", remappedServiceImpls));
+                            }
+                            if (remappedServiceName != null && !serviceName.equals(remappedServiceName)) {
                                 Path newPath = fileSystem.getPath((slash ? "/" : "") + "META-INF/services/" + remappedServiceName);
                                 Files.move(path, newPath);
                                 this.logger.info("Remapped service name: {} -> {}", serviceName, remappedServiceName);
