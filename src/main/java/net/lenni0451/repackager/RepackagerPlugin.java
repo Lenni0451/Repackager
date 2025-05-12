@@ -25,6 +25,7 @@ public class RepackagerPlugin implements Plugin<Project> {
                     thiz.getJarFile().set(repackagerExtension.getJarFile());
                     thiz.getOutputFile().set(repackagerExtension.getOutputFile());
                     thiz.getRelocations().set(repackagerExtension.getRelocations());
+                    thiz.getRemovals().set(repackagerExtension.getRemovals());
                     thiz.getRemapStrings().set(repackagerExtension.getRemapStrings());
                     thiz.getRemapServices().set(repackagerExtension.getRemapServices());
                     thiz.getRemapManifest().set(repackagerExtension.getRemapManifest());
@@ -46,6 +47,7 @@ public class RepackagerPlugin implements Plugin<Project> {
                 }
                 target.getDependencies().registerTransform(RepackageTransform.class, transform -> {
                     transform.getParameters().getRelocations().set(dependencyRepackagerExtension.getRelocations());
+                    transform.getParameters().getRemovals().set(dependencyRepackagerExtension.getRemovals());
                     transform.getParameters().getRemapStrings().set(dependencyRepackagerExtension.getRemapStrings());
                     transform.getParameters().getRemapServices().set(dependencyRepackagerExtension.getRemapServices());
                     transform.getParameters().getRemapManifest().set(dependencyRepackagerExtension.getRemapManifest());

@@ -29,6 +29,7 @@ public abstract class RepackageTransform implements TransformAction<RepackageTra
                 .inputFile(input)
                 .outputFile(output)
                 .relocations(this.getParameters().getRelocations().get())
+                .removals(this.getParameters().getRemovals().get())
                 .remapStrings(this.getParameters().getRemapStrings().get())
                 .remapServices(this.getParameters().getRemapServices().get())
                 .remapManifest(this.getParameters().getRemapManifest().get())

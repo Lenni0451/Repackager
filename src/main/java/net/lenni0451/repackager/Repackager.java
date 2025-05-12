@@ -3,6 +3,7 @@ package net.lenni0451.repackager;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import net.lenni0451.repackager.utils.ASMUtils;
+import net.lenni0451.repackager.utils.DeletingFileVisitor;
 import net.lenni0451.repackager.utils.PackageRemapper;
 import org.objectweb.asm.tree.*;
 import org.slf4j.Logger;
@@ -12,12 +13,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Builder
@@ -28,6 +27,7 @@ public class Repackager {
     private final File inputFile;
     private final File outputFile;
     private final Map<String, String> relocations;
+    private final Set<String> removals;
     private final boolean remapStrings;
     private final boolean remapServices;
     private final boolean remapManifest;
@@ -50,6 +50,7 @@ public class Repackager {
         PackageRemapper remapper = new PackageRemapper(this.relocations);
         try (FileSystem fileSystem = FileSystems.newFileSystem(file.toPath(), null)) {
             this.remap(fileSystem, remapper);
+            this.removeRemovals(fileSystem);
             if (this.removeEmptyDirs) this.removeEmptyDirectories(fileSystem);
         }
     }
@@ -145,6 +146,32 @@ public class Repackager {
                     throw new IllegalStateException("Failed to remap file: " + path, t);
                 }
             });
+        }
+    }
+
+    private void removeRemovals(final FileSystem fileSystem) throws IOException {
+        List<Path> toRemove;
+        try (Stream<Path> paths = Files.walk(fileSystem.getPath("/"))) {
+            toRemove = paths.filter(path -> {
+                String pathString = path.toString().toLowerCase(Locale.ROOT);
+                if (pathString.startsWith("/")) pathString = pathString.substring(1);
+                for (String s : this.removals) {
+                    if (pathString.startsWith(s.toLowerCase(Locale.ROOT))) {
+                        return true;
+                    }
+                }
+                return false;
+            }).collect(Collectors.toList());
+        }
+        for (Path path : toRemove) {
+            try {
+                if (!Files.exists(path)) continue;
+
+                Files.walkFileTree(path, new DeletingFileVisitor());
+                this.logger.debug("Removed file: {}", path);
+            } catch (Throwable t) {
+                throw new IllegalStateException("Failed to remove file: " + path, t);
+            }
         }
     }
 

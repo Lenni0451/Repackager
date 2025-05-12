@@ -29,6 +29,7 @@ public abstract class RepackageTask extends DefaultTask implements RepackageSett
                 .inputFile(this.getJarFile().get().getAsFile())
                 .outputFile(this.getOutputFile().isPresent() ? this.getOutputFile().get().getAsFile() : this.getJarFile().get().getAsFile())
                 .relocations(this.getRelocations().get())
+                .removals(this.getRemovals().get())
                 .remapStrings(this.getRemapStrings().get())
                 .remapServices(this.getRemapServices().get())
                 .remapManifest(this.getRemapManifest().get())
