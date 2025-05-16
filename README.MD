@@ -41,6 +41,12 @@ repackager {
             "net": "repackaged.net", //Relocate all classes in packages starting with "net" to "repackaged.net"
             "org.": "repackaged.org." //Relocate all classes in the "org" package to the "repackaged.org" package
     ]
+    removals = [ //All removed files/folders
+            //The files are removed from the jar after repackaging. Make sure to use the correct path.
+            //e.g. "org/" would need to be "repackaged/org/" according to the relocations above.
+            "META-INF/services/", //Remove all files in the "META-INF/services" folder
+            "example/unused/library/" //Remove all files in the "example/unused/library" folder
+    ]
     remapStrings = true //Search for matches in strings and remap them (optional, default: false)
     remapServices = true //Remap service providers (optional, default: true)
     remapManifest = true //Remap the manifest file (optional, default: true)
@@ -55,6 +61,12 @@ dependencyRepackager {
     relocations = [ //All relocated packages
             "net": "repackaged.net", //Relocate all classes in packages starting with "net" to "repackaged.net"
             "org.": "repackaged.org." //Relocate all classes in the "org" package to the "repackaged.org" package
+    ]
+    removals = [ //All removed files/folders
+            //The files are removed from the jar after repackaging. Make sure to use the correct path.
+            //e.g. "org/" would need to be "repackaged/org/" according to the relocations above.
+            "META-INF/services/", //Remove all files in the "META-INF/services" folder
+            "example/unused/library/" //Remove all files in the "example/unused/library" folder
     ]
     remapStrings = true //Search for matches in strings and remap them (optional, default: false)
     remapServices = true //Remap service providers (optional, default: true)
@@ -71,8 +83,12 @@ tasks.register("repackage", net.lenni0451.repackager.tasks.RepackageTask) {
     jarFile = jar.archiveFile
     outputFile = file("$buildDir/libs/${project.name}-repackaged.jar")
     relocations = [
-                    "net": "repackaged.net",
-                    "org.": "repackaged.org."
+            "net": "repackaged.net",
+            "org.": "repackaged.org."
+    ]
+    removals = [
+            "META-INF/services/",
+            "example/unused/library/"
     ]
     remapStrings = true
     remapServices = true
@@ -89,6 +105,10 @@ dependencyRepackager.register(
         /* relocations = */ [
                         "net": "repackaged.net",
                         "org.": "repackaged.org."
+        ],
+        /* removals = */ [
+            "META-INF/services/",
+            "example/unused/library/"
         ],
         /* remapStrings = */ false,
         /* remapServices = */ true,
