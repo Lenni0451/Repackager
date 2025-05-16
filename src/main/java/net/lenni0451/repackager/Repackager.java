@@ -34,8 +34,6 @@ public class Repackager {
     private final boolean removeEmptyDirs;
 
     public void run() throws Throwable {
-        if (this.relocations.isEmpty()) throw new IllegalArgumentException("Repackage task requires at least one relocation");
-
         File file;
         if (this.inputFile.equals(this.outputFile)) {
             //Repackaging in-place breaks the gradle jar cache
@@ -49,8 +47,8 @@ public class Repackager {
 
         PackageRemapper remapper = new PackageRemapper(this.relocations);
         try (FileSystem fileSystem = FileSystems.newFileSystem(file.toPath(), null)) {
-            this.remap(fileSystem, remapper);
-            this.removeRemovals(fileSystem);
+            if (!this.relocations.isEmpty()) this.remap(fileSystem, remapper);
+            if (!this.removals.isEmpty()) this.removeRemovals(fileSystem);
             if (this.removeEmptyDirs) this.removeEmptyDirectories(fileSystem);
         }
     }

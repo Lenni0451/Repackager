@@ -28,6 +28,7 @@ public interface RepackageSettings {
     Property<Boolean> getRemoveEmptyDirs();
 
     default void initDefaults() {
+        this.getRelocations().convention(Collections.emptyMap());
         this.getRemovals().convention(Collections.emptySet());
         this.getRemapStrings().convention(false);
         this.getRemapServices().convention(true);

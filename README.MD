@@ -37,11 +37,11 @@ Configure build output repackaging:
 repackager {
     jarFile = jar.archiveFile //The input jar file
     outputFile = file("$buildDir/libs/${project.name}-repackaged.jar") //The output jar file (optional, default: override input)
-    relocations = [ //All relocated packages
+    relocations = [ //All relocated packages (optional, default: none)
             "net": "repackaged.net", //Relocate all classes in packages starting with "net" to "repackaged.net"
             "org.": "repackaged.org." //Relocate all classes in the "org" package to the "repackaged.org" package
     ]
-    removals = [ //All removed files/folders
+    removals = [ //All removed files/folders (optional, default: none)
             //The files are removed from the jar after repackaging. Make sure to use the correct path.
             //e.g. "org/" would need to be "repackaged/org/" according to the relocations above.
             "META-INF/services/", //Remove all files in the "META-INF/services" folder
@@ -58,11 +58,11 @@ Configure dependency repackaging:
 ```groovy
 dependencyRepackager {
     configuration = configurations.transformed //The configuration to search for dependencies
-    relocations = [ //All relocated packages
+    relocations = [ //All relocated packages (optional, default: none)
             "net": "repackaged.net", //Relocate all classes in packages starting with "net" to "repackaged.net"
             "org.": "repackaged.org." //Relocate all classes in the "org" package to the "repackaged.org" package
     ]
-    removals = [ //All removed files/folders
+    removals = [ //All removed files/folders (optional, default: none)
             //The files are removed from the jar after repackaging. Make sure to use the correct path.
             //e.g. "org/" would need to be "repackaged/org/" according to the relocations above.
             "META-INF/services/", //Remove all files in the "META-INF/services" folder
