@@ -1,3 +1,8 @@
+# Deprecated, use [JarTransformer](https://github.com/Lenni0451/JarTransformer) instead
+Repackager has been deprecated in favor of JarTransformer, which is a more powerful and flexible tool for repackaging jars and applying other transformations.\
+Check out the readme of JarTransformer for a detailed guide on how to use it.
+
+
 # Repackager
 Gradle plugin for repackaging the build output and dependencies.\
 Dependencies are remapped before they are imported into the IDE. This allows you to use multiple versions of the same library in your project.
