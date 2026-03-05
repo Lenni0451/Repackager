@@ -4,14 +4,14 @@ import net.lenni0451.repackager.Repackager;
 import net.lenni0451.repackager.settings.RepackageSettings;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.Optional;
-import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
+import org.gradle.work.DisableCachingByDefault;
 
+@DisableCachingByDefault(because = "Repackaging in-place is not cacheable")
 public abstract class RepackageTask extends DefaultTask implements RepackageSettings {
 
     @InputFile
+    @PathSensitive(PathSensitivity.RELATIVE)
     public abstract RegularFileProperty getJarFile();
 
     @Optional
